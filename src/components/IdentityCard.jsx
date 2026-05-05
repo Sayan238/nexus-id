@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion';
 import ProfileImage from './ProfileImage';
 import StatusBadge from './StatusBadge';
 import VerifiedBadge from './VerifiedBadge';
@@ -107,16 +107,17 @@ const IdentityCard = () => {
           }}
         />
 
-        {/* Animated gradient border */}
-        <div
-          className="absolute inset-0 rounded-3xl pointer-events-none z-0"
+        {/* Glow effect border */}
+        <motion.div
+          className="absolute -inset-[1px] rounded-2xl md:rounded-3xl z-0 pointer-events-none"
           style={{
-            padding: '1px',
-            background: isHovered
-              ? `conic-gradient(from ${borderAngle}deg, #FFD700, #FFC300, transparent, transparent, #FFD700, transparent, #FFC300)`
-              : 'linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,255,255,0.04), rgba(255,215,0,0.12))',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
+            background: useMotionTemplate`
+              radial-gradient(
+                800px circle at ${mouseX}px ${mouseY}px,
+                rgba(255, 215, 0, 0.12),
+                transparent 80%
+              )
+            `,
             mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
             maskComposite: 'exclude',
             transition: 'all 0.4s ease',
@@ -135,7 +136,7 @@ const IdentityCard = () => {
         />
 
         {/* Card content */}
-        <div className="relative z-20 glass-card rounded-2xl md:rounded-3xl p-4 md:p-6 border-0 overflow-hidden">
+        <div className="relative z-20 glass-card rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 border-0 overflow-hidden">
           {/* Internal Noise Texture */}
           <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-0" />
           
@@ -144,75 +145,65 @@ const IdentityCard = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex items-center justify-between mb-4 md:mb-8"
+            className="flex items-center justify-between mb-8 md:mb-10"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full
+            <div className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full
               bg-gold-500/[0.06] border border-gold-500/15">
               <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-gold-500 shadow-[0_0_6px_rgba(255,215,0,0.5)]" />
               </span>
-              <span className="text-[9px] md:text-[11px] font-semibold text-gold-400/90 tracking-[0.2em] uppercase">
+              <span className="text-[8px] md:text-[11px] font-semibold text-gold-400/90 tracking-[0.2em] uppercase">
                 Verified Access
               </span>
             </div>
-            <span className="text-[10px] md:text-xs font-mono text-white/30 tracking-widest">
+            <span className="text-[9px] md:text-xs font-mono text-white/30 tracking-widest">
               {memberData.memberId}
             </span>
           </motion.div>
 
           {/* Main content: Profile + Info */}
-          <div className="flex flex-row md:flex-row gap-4 md:gap-8 items-center md:items-start">
+          <div className="flex flex-row gap-2 md:gap-8 items-center md:items-start mb-6">
             {/* Left: Avatar */}
             <div className="relative flex-shrink-0">
-              {/* KIIT NEXUS watermark behind profile - Hidden on mobile */}
-              <div className="hidden md:flex absolute -left-3 top-0 bottom-0 flex-col justify-center pointer-events-none select-none z-0 overflow-hidden">
-                {[...Array(4)].map((_, i) => (
-                  <span
-                    key={i}
-                    className="text-[32px] font-display font-black uppercase leading-tight tracking-tight"
-                    style={{
-                      color: 'transparent',
-                      WebkitTextStroke: '1px rgba(255,255,255,0.06)',
-                      opacity: 0.7 - i * 0.15,
-                    }}
-                  >
-                    KIIT NEXUS
-                  </span>
-                ))}
-              </div>
-              <div className="relative z-10 scale-75 md:scale-100 origin-left md:origin-center">
-                <ProfileImage src={memberData.avatar} alt={memberData.name} />
-              </div>
+              <ProfileImage src={memberData.avatar} alt={memberData.name} />
             </div>
 
             {/* Right: Info */}
-            <div className="flex-1 flex flex-col gap-1 md:gap-2">
-              <div className="flex flex-col gap-1">
+            <div className="flex-1 min-w-0 flex flex-col gap-1 md:gap-2">
+              <div className="flex flex-col gap-0.5 md:gap-1">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5, duration: 0.5 }}
-                  className="flex items-center gap-2"
+                  className="flex flex-col md:flex-row md:items-center gap-0 md:gap-2"
                 >
-                  <h1 className="text-xl md:text-3xl lg:text-4xl font-display font-extrabold uppercase tracking-tight text-white leading-[1.1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                    {memberData.name}
-                  </h1>
-                  <VerifiedBadge />
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-[28px] sm:text-3xl md:text-3xl lg:text-4xl font-display font-extrabold uppercase tracking-tight text-white leading-[0.9] flex flex-col">
+                      <span className="block sm:inline">Sayan</span>
+                      <span className="block sm:inline">Barman</span>
+                    </h1>
+                    <div className="md:hidden">
+                      <VerifiedBadge />
+                    </div>
+                  </div>
+                  <div className="hidden md:block">
+                    <VerifiedBadge />
+                  </div>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
-                  className="flex flex-col md:flex-row md:items-center gap-2"
+                  className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mt-1"
                 >
-                  <p className="text-xs md:text-base text-white/50 font-medium">
+                  <p className="text-[11px] md:text-base text-white/50 font-medium whitespace-nowrap">
                     {memberData.role}
                   </p>
                   <span className="hidden md:block w-1 h-1 rounded-full bg-white/20" />
                   <div className="inline-flex">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase
+                    <span className="px-1.5 py-0.5 rounded-full text-[8px] md:text-[10px] font-semibold tracking-wider uppercase
                       bg-gold-500/10 text-gold-500 border border-gold-500/20">
                       {memberData.department}
                     </span>
@@ -223,17 +214,17 @@ const IdentityCard = () => {
           </div>
 
           {/* Active Nexus Member badge */}
-          <div className="mt-4 md:mt-6">
+          <div className="mt-4 md:mt-8 flex justify-center md:justify-start">
             <StatusBadge status="Active Nexus Member" />
           </div>
 
           {/* Email */}
-          <div className="mt-3 md:mt-4">
+          <div className="mt-6 md:mt-8">
             <EmailSection email={memberData.email} />
           </div>
 
           {/* Social Buttons */}
-          <div className="mt-3 md:mt-4">
+          <div className="mt-6 md:mt-8">
             <SocialButtons />
           </div>
 
@@ -242,13 +233,13 @@ const IdentityCard = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.15 }}
-            className="mt-4 md:mt-5"
+            className="mt-6 md:mt-8"
           >
             <motion.button
               onClick={() => navigate('/projects')}
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
-              className="group flex items-center justify-between w-full px-5 py-3.5 rounded-xl
+              className="group flex items-center justify-between w-full px-5 py-3.5 md:px-6 md:py-4 rounded-xl md:rounded-2xl
                 bg-gradient-to-r from-gold-500/[0.08] to-gold-600/[0.04]
                 border border-gold-500/15 hover:border-gold-500/30
                 hover:shadow-[0_0_25px_rgba(255,215,0,0.08)]

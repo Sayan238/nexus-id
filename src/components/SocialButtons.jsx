@@ -68,7 +68,7 @@ const SocialButtons = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-wrap items-center gap-2.5"
+        className="flex flex-wrap items-center gap-2 md:gap-2.5"
       >
         {socialLinks.map((social) => (
           <motion.a
@@ -81,9 +81,9 @@ const SocialButtons = () => {
             rel="noopener noreferrer"
             title={social.name}
             className={`
-              inline-flex items-center gap-2 px-4 py-2.5
+              inline-flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5
               rounded-xl bg-white/[0.04] border border-white/[0.08]
-              text-white/50 text-sm font-medium transition-all duration-300
+              text-white/50 text-xs md:text-sm font-medium transition-all duration-300
               ${social.hoverColor}
             `}
           >

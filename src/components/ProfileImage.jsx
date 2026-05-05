@@ -34,7 +34,7 @@ const ProfileImage = ({ src, alt }) => {
       </div>
 
       {/* Image container */}
-      <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-2xl overflow-hidden
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-2xl overflow-hidden
         bg-gradient-to-br from-white/[0.06] to-white/[0.02]
         border border-white/[0.1] group-hover:border-gold-500/50
         shadow-2xl transition-all duration-500"

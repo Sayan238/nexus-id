@@ -8,15 +8,18 @@ const ParticleBackground = () => {
 
   const createParticles = useCallback((width, height) => {
     const particles = [];
-    const count = Math.min(Math.floor((width * height) / 5000), 180);
+    const isMobile = width < 768;
+    // Dramatically reduce count on mobile for performance
+    const baseCount = isMobile ? 50 : 180;
+    const count = Math.min(Math.floor((width * height) / (isMobile ? 12000 : 5000)), baseCount);
     
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 2.5 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.8,
-        speedY: (Math.random() - 0.5) * 0.8,
+        size: Math.random() * (isMobile ? 1.5 : 2.5) + 0.5,
+        speedX: (Math.random() - 0.5) * (isMobile ? 0.5 : 0.8),
+        speedY: (Math.random() - 0.5) * (isMobile ? 0.5 : 0.8),
         opacity: Math.random() * 0.6 + 0.2,
         pulse: Math.random() * Math.PI * 2,
         pulseSpeed: Math.random() * 0.05 + 0.02,
@@ -31,7 +34,8 @@ const ParticleBackground = () => {
     const ctx = canvas.getContext('2d');
     let width = window.innerWidth;
     let height = window.innerHeight;
-    let dpr = window.devicePixelRatio || 1;
+    // Cap DPR for mobile performance (don't over-render on tiny high-res screens)
+    let dpr = Math.min(window.devicePixelRatio || 1, width < 768 ? 1.5 : 2.5);
 
     const resize = () => {
       width = window.innerWidth;
@@ -114,20 +118,22 @@ const ParticleBackground = () => {
           ctx.fill();
         }
 
-        // Draw connections
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const connDist = Math.sqrt((p.x - p2.x) ** 2 + (p.y - p2.y) ** 2);
-          if (connDist < 150) {
-            const alpha = (1 - connDist / 150) * 0.15;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = p.isGold || p2.isGold
-              ? `rgba(255, 215, 0, ${alpha})`
-              : `rgba(255, 255, 255, ${alpha * 0.6})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
+        // Draw connections - Skip on mobile for massive performance gain
+        if (width >= 768) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const connDist = Math.sqrt((p.x - p2.x) ** 2 + (p.y - p2.y) ** 2);
+            if (connDist < 150) {
+              const alpha = (1 - connDist / 150) * 0.15;
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = p.isGold || p2.isGold
+                ? `rgba(255, 215, 0, ${alpha})`
+                : `rgba(255, 255, 255, ${alpha * 0.6})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
           }
         }
       });
